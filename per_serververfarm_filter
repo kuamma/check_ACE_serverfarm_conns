@@ -1,0 +1,26 @@
+#!/bin/bash
+rm /usr/local/bin/checks_ace/logs/logs_conn/serverfarms_detail_$1.log
+/usr/local/bin/checks_ace/./check_serverfarm_name_ACE.sh $1
+for i in `cat /usr/local/bin/checks_ace/logs/logs_conn/serverfarms_$1.log`
+do
+        rm /usr/local/bin/checks_ace/logs/servers/$i
+        sed -n -e '/serverfarm     : '$i,'/,/HOST/ p' /usr/local/bin/checks_ace/logs/logs_conn/serverfarms_detail_$1.log | grep 'OPER\|FAIL' | grep -v descri | tee /usr/local/bin/checks_ace/logs/servers/$i
+done
+
+for i in `cat /usr/local/bin/checks_ace/logs/logs_conn/serverfarms_$1.log`
+do
+        number_servers=$(cat /usr/local/bin/checks_ace/logs/servers/$i | wc -l)
+        rm /usr/local/bin/checks_ace/logs/servers_awk/$i
+        while [ $number_servers -gt 0 ]
+        do
+                member=$( cat /usr/local/bin/checks_ace/logs/servers/$i | awk "NR==$number_servers" | awk '{print $1}' )
+                connection_current=$( cat /usr/local/bin/checks_ace/logs/servers/$i | awk "NR==$number_servers" | awk '{print $5}' )
+                connection_last=$( cat /usr/local/bin/checks_ace/logs/servers/$i'_last' | awk "NR==$number_servers" | awk '{print $5}' )
+                connection=$((connection_current - connection_last))
+                echo '|'$member' connections='$connection >> /usr/local/bin/checks_ace/logs/servers_awk/$i
+                number_servers=$(( $number_servers - 1 ))
+        done
+        cp /usr/local/bin/checks_ace/logs/servers/$i /usr/local/bin/checks_ace/logs/servers/$i'_last'
+done
+#commentario
+#comment3
