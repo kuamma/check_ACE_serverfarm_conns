@@ -22,5 +22,3 @@ do
         done
         cp /usr/local/bin/checks_ace/logs/servers/$i /usr/local/bin/checks_ace/logs/servers/$i'_last'
 done
-#commentario
-#comment3
